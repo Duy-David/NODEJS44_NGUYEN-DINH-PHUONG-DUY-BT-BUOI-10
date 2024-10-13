@@ -1,4 +1,4 @@
-export const OK_STATUS = 200;
-export const CREATED_STATUS = 201;
-export const INTERNAL_SERVER_ERROR_STATUS = 500;
-export const BAD_REQUEST_ERROR_STATUS = 400; 
+export const OK = 200;
+export const CREATED_OK = 201;
+export const SERVER_ERROR = 500;
+export const REQUEST_ERROR = 400;

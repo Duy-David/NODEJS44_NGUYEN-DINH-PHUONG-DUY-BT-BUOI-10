@@ -1,10 +1,6 @@
 import initModels from "../models/init-models.js";
 import sequelize from "../models/connect.js";
-import {
-  BAD_REQUEST_ERROR_STATUS,
-  INTERNAL_SERVER_ERROR_STATUS,
-  OK_STATUS,
-} from "../common/status.js";
+import { REQUEST_ERROR, SERVER_ERROR, OK, CREATED_OK } from "../common/status.js";
 
 const model = initModels(sequelize);
 
@@ -12,19 +8,12 @@ export const handleLikeRestaurant = async (req, res) => {
   try {
     const { user_id, res_id } = req.body;
 
-    // Check if user is exist
     const user = await model.users.findOne({ where: { user_id } });
-    if (!user) {
-      return res.status(BAD_REQUEST_ERROR_STATUS).json({
-        message: "User not found!",
-      });
-    }
-
-    // Check if restaurant is exist
     const restaurant = await model.restaurants.findOne({ where: { res_id } });
-    if (!restaurant) {
-      return res.status(BAD_REQUEST_ERROR_STATUS).json({
-        message: "Restaurant not found!",
+
+    if (!user || !restaurant) {
+      return res.status(REQUEST_ERROR).json({
+        message: "Not found!",
       });
     }
 
@@ -33,8 +22,8 @@ export const handleLikeRestaurant = async (req, res) => {
       where: { user_id, res_id },
     });
     if (existingLike) {
-      return res.status(BAD_REQUEST_ERROR_STATUS).json({
-        message: "This user has already liked this restaurant!",
+      return res.status(REQUEST_ERROR).json({
+        message: "Existing like between user and restaurant",
       });
     }
 
@@ -45,12 +34,12 @@ export const handleLikeRestaurant = async (req, res) => {
       date_like: new Date(),
     });
 
-    return res.status(OK_STATUS).json({
+    return res.status(CREATED_OK).json({
       message: "Like restaurant successfully!",
       data: like,
     });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR_STATUS).json({
+    return res.status(SERVER_ERROR).json({
       error: error.message,
     });
   }
@@ -60,29 +49,29 @@ export const handleUnlikeRestaurant = async (req, res) => {
   try {
     const { user_id, res_id } = req.body;
 
-    const deleteInfo = await model.like_res.destroy({
+    const deleteLike = await model.like_res.destroy({
       where: { user_id, res_id },
     });
 
-    if (deleteInfo) {
-      return res.status(OK_STATUS).json({
+    if (deleteLike) {
+      return res.status(OK).json({
         message: "Unlike successfully!",
-        data: deleteInfo,
+        data: deleteLike,
       });
     } else {
-      return res.status(BAD_REQUEST_ERROR_STATUS).json({
-        message: "There's nothing to unlike!",
-        data: deleteInfo,
+      return res.status(REQUEST_ERROR).json({
+        message: " Unlike not successfully!!",
+        data: deleteLike,
       });
     }
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR_STATUS).json({
+    return res.status(SERVER_ERROR).json({
       error: error.message,
     });
   }
 };
 
-export const getRestaurantLikeList = async (req, res) => {
+export const getRestaurantLike = async (req, res) => {
   try {
     const { res_id } = req.body;
 
@@ -92,17 +81,18 @@ export const getRestaurantLikeList = async (req, res) => {
       },
     });
 
-    return res.status(OK_STATUS).json({
+    return res.status(OK).json({
+      message: "Successfully!",
       data: likeList,
     });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR_STATUS).json({
+    return res.status(INTERNAL_SERVER_ERROR).json({
       error: error.message,
     });
   }
 };
 
-export const getUserLikeList = async (req, res) => {
+export const getUserLike = async (req, res) => {
   try {
     const { user_id } = req.body;
 
@@ -112,11 +102,12 @@ export const getUserLikeList = async (req, res) => {
       },
     });
 
-    return res.status(OK_STATUS).json({
+    return res.status(OK).json({
+      message: "Successfully!",
       data: likeList,
     });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR_STATUS).json({
+    return res.status(SERVER_ERROR).json({
       error: error.message,
     });
   }

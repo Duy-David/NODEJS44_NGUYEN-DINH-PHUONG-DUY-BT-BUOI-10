@@ -13,9 +13,6 @@ app.use(rootRouter);
 app.get("/", (req, res) => {
   res.send("Hello world");
 });
-app.get("/testapi", (req, res) => {
-  res.send("Test");
-});
 
 app.listen(port, () => {
   console.log(`Server starts with port ${port}`);
